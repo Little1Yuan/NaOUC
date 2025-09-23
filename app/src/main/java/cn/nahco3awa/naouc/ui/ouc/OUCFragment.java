@@ -3,6 +3,7 @@ package cn.nahco3awa.naouc.ui.ouc;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +30,9 @@ import cn.nahco3awa.naouc.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
+import cn.nahco3awa.naouc.network.ouc.request.GetBarCodePayOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetInfoByTokenOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 
@@ -89,6 +92,55 @@ public class OUCFragment extends Fragment {
                     infoResponse = response;
                     requireActivity().runOnUiThread(() -> {
                         welcomeTextView.setText("欢迎回来，" + response.getName());
+                        String account = infoResponse.getAccount();
+                        String cardId = infoResponse.getCardId();
+
+                        try {
+                            GetBarCodePayOUCRequest getBarCodePayOUCRequest = new GetBarCodePayOUCRequest(account, cardId, OUCRequestSender.getInstance().getImeiTicket(), OUCRequestSender.getInstance().getSourceTypeTicket());
+                            OUCRequestSender.getInstance().getBarCodePay(getBarCodePayOUCRequest, new OUCCallback<>() {
+                                @Override
+                                public void onSuccess(GetBarCodePayOUCResponse response) {
+                                    try {
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        stringBuilder.append("到期时间：")
+                                                .append(response.getExpires())
+                                                .append("\n账户编号：")
+                                                .append(response.getAccount())
+                                                .append("\n条码信息：");
+                                        for (String s : response.getBarcode()) {
+                                            stringBuilder.append('\n')
+                                                    .append(s);
+                                        }
+                                        requireActivity().runOnUiThread(() -> new AlertDialog.Builder(getActivity())
+                                                .setTitle("获取支付码成功！")
+                                                .setMessage(stringBuilder.toString())
+                                                .setNegativeButton("蒿", null)
+                                                .show());
+                                    } catch (Exception e) {
+                                        requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                                                .setTitle("显示支付码错误！")
+                                                .setMessage(e.getMessage())
+                                                .setNegativeButton("蒿", null)
+                                                .show());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable e) {
+                                    requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                                            .setTitle("获取支付码错误！")
+                                            .setMessage(e.getMessage())
+                                            .setNegativeButton("蒿", null)
+                                            .show());
+                                }
+                            });
+                        } catch (Exception e) {
+                            requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                                    .setTitle("获取支付码错误！")
+                                    .setMessage(e.getMessage())
+                                    .setNegativeButton("蒿", null)
+                                    .show());
+                        }
                     });
                 }
 
