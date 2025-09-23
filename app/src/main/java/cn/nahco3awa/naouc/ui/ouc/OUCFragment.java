@@ -1,0 +1,108 @@
+package cn.nahco3awa.naouc.ui.ouc;
+
+import static android.content.Context.MODE_PRIVATE;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.util.Random;
+
+import cn.nahco3awa.naouc.OucLoginMainActivity;
+import cn.nahco3awa.naouc.R;
+import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
+import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
+
+public class OUCFragment extends Fragment {
+    private SharedPreferences preferences;
+    private FragmentOucBinding binding;
+    private String sno = null;
+    private String sourceType = null;
+    private Button loginButton;
+    private TextView welcomeTextView;
+    private View root;
+    private ActivityResultLauncher<Intent> loginLauncher;
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentOucBinding.inflate(inflater, container, false);
+        root = binding.getRoot();
+        Context context = root.getContext();
+
+        preferences = context.getSharedPreferences("ouc", MODE_PRIVATE);
+        if (!preferences.contains("imei")) {
+            StringBuilder stringBuilder = new StringBuilder();
+            Random random = new Random();
+            for (int i = 0; i < 32; i++) {
+                stringBuilder.append(random.nextInt(10));
+            }
+            preferences.edit()
+                    .putString("imei", stringBuilder.toString())
+                    .apply();
+        }
+        OUCRequestSender.init(preferences.getString("imei", "1145141919810deadbeef52013149922"));
+
+        loginLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                refreshLogonState();
+            }
+        });
+
+        loginButton = root.findViewById(R.id.oucMainLoginButton);
+        welcomeTextView = root.findViewById(R.id.oucMainWelcomeTextView);
+
+        loginButton.setOnClickListener(this::onClickLogin);
+
+        refreshLogonState();
+
+        return root;
+    }
+
+    public void refreshLogonState() {
+        if (isLogon()) {
+            loginButton.setText("登出");
+            sno = preferences.getString("sno",  "");
+            sourceType = preferences.getString("source_ticket", "");
+
+            welcomeTextView.setText("欢迎回来，" + sno);
+        } else {
+            loginButton.setText("登录");
+            welcomeTextView.setText("尚未登录");
+        }
+    }
+
+    public boolean isLogon() {
+        return preferences.getBoolean("logon",false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    public void onClickLogin(View view) {
+        if (isLogon()) {
+            preferences.edit()
+                    .putBoolean("logon", false)
+                    .apply();
+            refreshLogonState();
+        } else {
+            loginLauncher.launch(new Intent(getActivity(), OucLoginMainActivity.class));
+        }
+    }
+}
