@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -21,12 +22,16 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.Objects;
 import java.util.Random;
 
 import cn.nahco3awa.naouc.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
+import cn.nahco3awa.naouc.network.ouc.request.GetInfoByTokenOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 
 public class OUCFragment extends Fragment {
     private SharedPreferences preferences;
@@ -72,13 +77,29 @@ public class OUCFragment extends Fragment {
         return root;
     }
 
+    private GetInfoByTokenOUCResponse infoResponse = null;
     public void refreshLogonState() {
         if (isLogon()) {
             loginButton.setText("登出");
             sno = preferences.getString("sno",  "");
             sourceType = preferences.getString("source_ticket", "");
+            OUCRequestSender.getInstance().getInfoByToken(new GetInfoByTokenOUCRequest(OUCRequestSender.getInstance().getImeiTicket(), sourceType, sourceType), new OUCCallback<GetInfoByTokenOUCResponse>() {
+                @Override
+                public void onSuccess(GetInfoByTokenOUCResponse response) {
+                    infoResponse = response;
+                    requireActivity().runOnUiThread(() -> {
+                        welcomeTextView.setText("欢迎回来，" + response.getName());
+                    });
+                }
 
-            welcomeTextView.setText("欢迎回来，" + sno);
+                @Override
+                public void onFailure(Throwable e) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(getActivity(), "获取个人信息失败！", Toast.LENGTH_SHORT).show();
+                        welcomeTextView.setText("可能需要重新登录？");
+                    });
+                }
+            });
         } else {
             loginButton.setText("登录");
             welcomeTextView.setText("尚未登录");

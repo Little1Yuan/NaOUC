@@ -4,10 +4,12 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
+import cn.nahco3awa.naouc.network.ouc.request.GetInfoByTokenOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetRsaOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetValidateCodeOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.LoginOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
+import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetRsaKeyOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetValidateCodeOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.LoginOUCResponse;
@@ -60,6 +62,20 @@ public class OUCRequestSender {
                 .header("Sec-Fetch-Dest", "empty")
                 .header("Referer", "https://vcard.ouc.edu.cn//Phone/Login")
                 .header("User-Agent", "Mozilla/5.0 (Linux; Android 12; ALA-AN70 Build/HONORALA-AN70; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/99.0.4844.88 Mobile Safari/537.36");
+    }
+
+    public void getInfoByToken(GetInfoByTokenOUCRequest request, OUCCallback<GetInfoByTokenOUCResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                callback.onSuccess(new GetInfoByTokenOUCResponse(response));
+            }
+        });
     }
 
     public void getRsaKey(GetRsaOUCRequest request, OUCCallback<GetRsaKeyOUCResponse> callback) {
