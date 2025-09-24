@@ -1,5 +1,8 @@
 package cn.nahco3awa.naouc.network.ouc.response;
 
+import android.os.Debug;
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -13,6 +16,7 @@ public class GetBarCodePayOUCResponse extends OUCResponse {
         super(response);
         JsonObject object = JsonParser.parseReader(response.body().charStream()).getAsJsonObject();
         if (!object.get("retcode").getAsString().equals("0")) {
+            Log.e("GBCP", object.toString());
             throw new RuntimeException(object.get("errmsg").getAsString());
         }
         JsonObject obj = object.getAsJsonObject("obj");

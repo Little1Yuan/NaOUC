@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,7 @@ public class OUCFragment extends Fragment {
             loginButton.setText("登出");
             sno = preferences.getString("sno",  "");
             sourceType = preferences.getString("source_ticket", "");
+            OUCRequestSender.getInstance().setSourceTypeTicket(sourceType);
             OUCRequestSender.getInstance().getInfoByToken(new GetInfoByTokenOUCRequest(OUCRequestSender.getInstance().getImeiTicket(), sourceType, sourceType), new OUCCallback<GetInfoByTokenOUCResponse>() {
                 @Override
                 public void onSuccess(GetInfoByTokenOUCResponse response) {
@@ -93,10 +95,9 @@ public class OUCFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         welcomeTextView.setText("欢迎回来，" + response.getName());
                         String account = infoResponse.getAccount();
-                        String cardId = infoResponse.getCardId();
 
                         try {
-                            GetBarCodePayOUCRequest getBarCodePayOUCRequest = new GetBarCodePayOUCRequest(account, cardId, OUCRequestSender.getInstance().getImeiTicket(), OUCRequestSender.getInstance().getSourceTypeTicket());
+                            GetBarCodePayOUCRequest getBarCodePayOUCRequest = new GetBarCodePayOUCRequest(account, "1", OUCRequestSender.getInstance().getImeiTicket(), OUCRequestSender.getInstance().getSourceTypeTicket());
                             OUCRequestSender.getInstance().getBarCodePay(getBarCodePayOUCRequest, new OUCCallback<>() {
                                 @Override
                                 public void onSuccess(GetBarCodePayOUCResponse response) {
