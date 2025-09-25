@@ -29,6 +29,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.util.Locale;
 import java.util.Random;
 
 import cn.nahco3awa.naouc.OucLoginMainActivity;
@@ -36,8 +37,10 @@ import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import cn.nahco3awa.naouc.network.ouc.request.GetBarCodePayOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.GetCardAccInfoOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetInfoByTokenOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 
@@ -52,6 +55,7 @@ public class OUCFragment extends Fragment {
     private ActivityResultLauncher<Intent> loginLauncher;
     private ImageView barcodeImageView;
     private ImageView qrCodeImageView;
+    private TextView balanceTextView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentOucBinding.inflate(inflater, container, false);
@@ -81,6 +85,7 @@ public class OUCFragment extends Fragment {
         welcomeTextView = root.findViewById(R.id.oucMainWelcomeTextView);
         barcodeImageView = root.findViewById(R.id.oucBarcodeImageView);
         qrCodeImageView = root.findViewById(R.id.qrCodeImageView);
+        balanceTextView = root.findViewById(R.id.balanceTextView);
 
         loginButton.setOnClickListener(this::onClickLogin);
         welcomeTextView.setOnClickListener(this::onClickWelcomeText);
@@ -106,6 +111,7 @@ public class OUCFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         refreshWelcomeText();
                         refreshPayCode();
+                        refreshBalance();
                     });
                 }
 
@@ -124,7 +130,25 @@ public class OUCFragment extends Fragment {
     }
 
     private void onClickRefreshPayCode(View view) {
-        refreshPayCode();
+        if (isLogon()) {
+            refreshPayCode();
+        }
+    }
+
+    private void refreshBalance() {
+        String account = infoResponse.getAccount();
+        balanceTextView.setText("...");
+        OUCRequestSender.getInstance().getCardAccInfo(new GetCardAccInfoOUCRequest(account), new OUCCallback<>() {
+            @Override
+            public void onSuccess(GetCardAccInfoOUCResponse response) {
+                requireActivity().runOnUiThread(() -> balanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0)));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                requireActivity().runOnUiThread(() -> balanceTextView.setText("获取失败"));
+            }
+        });
     }
 
     private void refreshPayCode() {
