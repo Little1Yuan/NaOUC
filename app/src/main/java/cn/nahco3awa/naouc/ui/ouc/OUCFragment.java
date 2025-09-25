@@ -120,6 +120,12 @@ public class OUCFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(getActivity(), "获取个人信息失败！", Toast.LENGTH_SHORT).show();
                         welcomeTextView.setText("可能需要重新登录？");
+                        if (e.getMessage() != null && e.getMessage().equals("令牌失效")) {
+                            preferences.edit()
+                                    .putBoolean("logon", false)
+                                    .apply();
+                            refreshLogonState();
+                        }
                     });
                 }
             });

@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/navigation_ouc"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="" />
+        android:icon="@drawable/ic_action_card"
+        android:title="e卡通" />
 
 </menu>

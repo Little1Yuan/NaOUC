@@ -1,8 +1,13 @@
 package cn.nahco3awa.naouc.network.ouc.response;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.IOException;
+
+import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import okhttp3.Response;
 
 public class GetInfoByTokenOUCResponse extends OUCResponse {

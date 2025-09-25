@@ -144,7 +144,8 @@ public class OucLoginMainActivity extends AppCompatActivity {
                                         .putBoolean("logon", true)
                                         .putString("sno", loginResponse.getSno())
                                         .apply();
-                                Toast.makeText(OucLoginMainActivity.this, loginResponse.getName() + "，欢迎回来~", LENGTH_SHORT).show();
+                                String name = preferences.getString("nickname", loginResponse.getName());
+                                Toast.makeText(OucLoginMainActivity.this, name + "，欢迎回来~", LENGTH_SHORT).show();
                                 setResult(Activity.RESULT_OK);
                                 finish();
                             });

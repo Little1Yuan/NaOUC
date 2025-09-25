@@ -127,7 +127,11 @@ public class OUCRequestSender {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                callback.onSuccess(new GetInfoByTokenOUCResponse(response));
+                try {
+                    callback.onSuccess(new GetInfoByTokenOUCResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
             }
         });
     }
@@ -140,7 +144,7 @@ public class OUCRequestSender {
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
                 callback.onSuccess(new GetRsaKeyOUCResponse(response));
             }
         });
