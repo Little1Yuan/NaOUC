@@ -5,26 +5,30 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
-import java.util.Objects;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
 import java.util.Random;
 
 import cn.nahco3awa.naouc.OucLoginMainActivity;
@@ -46,6 +50,8 @@ public class OUCFragment extends Fragment {
     private TextView welcomeTextView;
     private View root;
     private ActivityResultLauncher<Intent> loginLauncher;
+    private ImageView barcodeImageView;
+    private ImageView qrCodeImageView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentOucBinding.inflate(inflater, container, false);
@@ -73,8 +79,13 @@ public class OUCFragment extends Fragment {
 
         loginButton = root.findViewById(R.id.oucMainLoginButton);
         welcomeTextView = root.findViewById(R.id.oucMainWelcomeTextView);
+        barcodeImageView = root.findViewById(R.id.oucBarcodeImageView);
+        qrCodeImageView = root.findViewById(R.id.qrCodeImageView);
 
         loginButton.setOnClickListener(this::onClickLogin);
+        welcomeTextView.setOnClickListener(this::onClickWelcomeText);
+        barcodeImageView.setOnClickListener(this::onClickRefreshPayCode);
+        qrCodeImageView.setOnClickListener(this::onClickRefreshPayCode);
 
         refreshLogonState();
 
@@ -93,55 +104,8 @@ public class OUCFragment extends Fragment {
                 public void onSuccess(GetInfoByTokenOUCResponse response) {
                     infoResponse = response;
                     requireActivity().runOnUiThread(() -> {
-                        welcomeTextView.setText("欢迎回来，" + response.getName());
-                        String account = infoResponse.getAccount();
-
-                        try {
-                            GetBarCodePayOUCRequest getBarCodePayOUCRequest = new GetBarCodePayOUCRequest(account, "1", OUCRequestSender.getInstance().getImeiTicket(), OUCRequestSender.getInstance().getSourceTypeTicket());
-                            OUCRequestSender.getInstance().getBarCodePay(getBarCodePayOUCRequest, new OUCCallback<>() {
-                                @Override
-                                public void onSuccess(GetBarCodePayOUCResponse response) {
-                                    try {
-                                        StringBuilder stringBuilder = new StringBuilder();
-                                        stringBuilder.append("到期时间：")
-                                                .append(response.getExpires())
-                                                .append("\n账户编号：")
-                                                .append(response.getAccount())
-                                                .append("\n条码信息：");
-                                        for (String s : response.getBarcode()) {
-                                            stringBuilder.append('\n')
-                                                    .append(s);
-                                        }
-                                        requireActivity().runOnUiThread(() -> new AlertDialog.Builder(getActivity())
-                                                .setTitle("获取支付码成功！")
-                                                .setMessage(stringBuilder.toString())
-                                                .setNegativeButton("蒿", null)
-                                                .show());
-                                    } catch (Exception e) {
-                                        requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
-                                                .setTitle("显示支付码错误！")
-                                                .setMessage(e.getMessage())
-                                                .setNegativeButton("蒿", null)
-                                                .show());
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Throwable e) {
-                                    requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
-                                            .setTitle("获取支付码错误！")
-                                            .setMessage(e.getMessage())
-                                            .setNegativeButton("蒿", null)
-                                            .show());
-                                }
-                            });
-                        } catch (Exception e) {
-                            requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
-                                    .setTitle("获取支付码错误！")
-                                    .setMessage(e.getMessage())
-                                    .setNegativeButton("蒿", null)
-                                    .show());
-                        }
+                        refreshWelcomeText();
+                        refreshPayCode();
                     });
                 }
 
@@ -157,6 +121,78 @@ public class OUCFragment extends Fragment {
             loginButton.setText("登录");
             welcomeTextView.setText("尚未登录");
         }
+    }
+
+    private void onClickRefreshPayCode(View view) {
+        refreshPayCode();
+    }
+
+    private void refreshPayCode() {
+        String account = infoResponse.getAccount();
+
+        try {
+            GetBarCodePayOUCRequest getBarCodePayOUCRequest = new GetBarCodePayOUCRequest(account, "1", OUCRequestSender.getInstance().getImeiTicket(), OUCRequestSender.getInstance().getSourceTypeTicket());
+            OUCRequestSender.getInstance().getBarCodePay(getBarCodePayOUCRequest, new OUCCallback<>() {
+                @Override
+                public void onSuccess(GetBarCodePayOUCResponse response) {
+                    try {
+                        requireActivity().runOnUiThread(() -> {
+                            try {
+                                BarcodeFormat barcodeFormat = BarcodeFormat.CODE_128;
+                                BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+                                BitMatrix bitMatrix = barcodeEncoder.encode(response.getBarcode()[0], barcodeFormat, barcodeImageView.getWidth(), barcodeImageView.getHeight());
+                                Bitmap barcodeBitmap = barcodeEncoder.createBitmap(bitMatrix);
+                                barcodeImageView.setImageBitmap(barcodeBitmap);
+
+                                bitMatrix = barcodeEncoder.encode(response.getBarcode()[0], BarcodeFormat.QR_CODE, qrCodeImageView.getWidth(), qrCodeImageView.getHeight());
+                                Bitmap qrBitmap = barcodeEncoder.createBitmap(bitMatrix);
+                                qrCodeImageView.setImageBitmap(qrBitmap);
+                            } catch (WriterException e) {
+                                requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                                        .setTitle("显示支付码错误！")
+                                        .setMessage(e.getMessage())
+                                        .setNegativeButton("蒿", null)
+                                        .show());
+                            }
+
+                        });
+                    } catch (Exception e) {
+                        requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                                .setTitle("显示支付码错误！")
+                                .setMessage(e.getMessage())
+                                .setNegativeButton("蒿", null)
+                                .show());
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable e) {
+                    requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                            .setTitle("获取支付码错误！")
+                            .setMessage(e.getMessage())
+                            .setNegativeButton("蒿", null)
+                            .show());
+                }
+            });
+        } catch (Exception e) {
+            requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireActivity())
+                    .setTitle("获取支付码错误！")
+                    .setMessage(e.getMessage())
+                    .setNegativeButton("蒿", null)
+                    .show());
+        }
+    }
+
+    private void refreshWelcomeText() {
+        if (isLogon()) {
+            welcomeTextView.setText("欢迎回来，" + getName() + "~");
+        } else {
+            welcomeTextView.setText("尚未登录");
+        }
+    }
+
+    private String getName() {
+        return preferences.getString("nickname", infoResponse == null ? "" : infoResponse.getName());
     }
 
     public boolean isLogon() {
@@ -178,5 +214,23 @@ public class OUCFragment extends Fragment {
         } else {
             loginLauncher.launch(new Intent(getActivity(), OucLoginMainActivity.class));
         }
+    }
+
+    private void onClickWelcomeText(View view) {
+        EditText editText = new EditText(requireContext());
+        editText.setHint("输出昵称...");
+        String nick = preferences.getString("nickname", infoResponse == null ? "" : infoResponse.getName());
+        editText.setText(nick);
+        new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
+                .setTitle("设置昵称：")
+                .setView(editText)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("应用", (dialogInterface, i) -> {
+                    preferences.edit()
+                            .putString("nickname", editText.getText().toString())
+                            .apply();
+                    refreshWelcomeText();
+                })
+                .show();
     }
 }

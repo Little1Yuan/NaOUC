@@ -13,6 +13,9 @@ navigationFragment = "2.9.3"
 navigationUi = "2.9.3"
 okhttp = "5.1.0"
 activity = "1.11.0"
+core = "3.5.3"
+javase = "3.5.3"
+zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -28,6 +31,9 @@ navigation-fragment = { group = "androidx.navigation", name = "navigation-fragme
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+core = { group = "com.google.zxing", name = "core", version.ref = "core" }
+javase = { group = "com.google.zxing", name = "javase", version.ref = "javase" }
+zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
