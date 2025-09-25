@@ -32,6 +32,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.util.Locale;
 import java.util.Random;
 
+import cn.nahco3awa.naouc.OucBalanceActivity;
 import cn.nahco3awa.naouc.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
@@ -91,6 +92,7 @@ public class OUCFragment extends Fragment {
         welcomeTextView.setOnClickListener(this::onClickWelcomeText);
         barcodeImageView.setOnClickListener(this::onClickRefreshPayCode);
         qrCodeImageView.setOnClickListener(this::onClickRefreshPayCode);
+        root.findViewById(R.id.cashButton).setOnClickListener(this::onClickBalance);
 
         refreshLogonState();
 
@@ -104,7 +106,7 @@ public class OUCFragment extends Fragment {
             sno = preferences.getString("sno",  "");
             sourceType = preferences.getString("source_ticket", "");
             OUCRequestSender.getInstance().setSourceTypeTicket(sourceType);
-            OUCRequestSender.getInstance().getInfoByToken(new GetInfoByTokenOUCRequest(OUCRequestSender.getInstance().getImeiTicket(), sourceType, sourceType), new OUCCallback<GetInfoByTokenOUCResponse>() {
+            OUCRequestSender.getInstance().getInfoByToken(new GetInfoByTokenOUCRequest(OUCRequestSender.getInstance().getImeiTicket(), sourceType, sourceType), new OUCCallback<>() {
                 @Override
                 public void onSuccess(GetInfoByTokenOUCResponse response) {
                     infoResponse = response;
@@ -136,8 +138,9 @@ public class OUCFragment extends Fragment {
     }
 
     private void onClickRefreshPayCode(View view) {
-        if (isLogon()) {
+        if (isLogon() && infoResponse != null) {
             refreshPayCode();
+            refreshBalance();
         }
     }
 
@@ -210,6 +213,14 @@ public class OUCFragment extends Fragment {
                     .setMessage(e.getMessage())
                     .setNegativeButton("蒿", null)
                     .show());
+        }
+    }
+
+    private void onClickBalance(View view) {
+        if (isLogon() && infoResponse != null) {
+            Intent intent = new Intent(getActivity(), OucBalanceActivity.class);
+            intent.putExtra("account", infoResponse.getAccount());
+            startActivity(intent);
         }
     }
 
