@@ -15,10 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NaOUC">
         <activity
-            android:name=".OucBalanceActivity"
+            android:name=".ui.ouc.activity.OucBalanceActivity"
             android:exported="false" />
         <activity
-            android:name=".OucLoginMainActivity"
+            android:name=".ui.ouc.activity.OucLoginMainActivity"
             android:label="我的余额" />
         <activity
             android:name=".MainActivity"

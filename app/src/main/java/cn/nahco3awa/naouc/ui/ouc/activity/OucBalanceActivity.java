@@ -1,4 +1,4 @@
-package cn.nahco3awa.naouc;
+package cn.nahco3awa.naouc.ui.ouc.activity;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Locale;
 
+import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import cn.nahco3awa.naouc.network.ouc.request.AccountPayAliPayOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetCardAccInfoOUCRequest;

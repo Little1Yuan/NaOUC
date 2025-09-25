@@ -1,4 +1,4 @@
-package cn.nahco3awa.naouc;
+package cn.nahco3awa.naouc.ui.ouc.activity;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -24,6 +24,7 @@ import java.security.spec.RSAPublicKeySpec;
 
 import javax.crypto.Cipher;
 
+import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import cn.nahco3awa.naouc.network.ouc.request.GetRsaOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetValidateCodeOUCRequest;

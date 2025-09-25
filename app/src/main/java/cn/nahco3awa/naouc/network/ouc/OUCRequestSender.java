@@ -7,6 +7,7 @@ import java.io.IOException;
 import cn.nahco3awa.naouc.network.ouc.request.AccountPayAliPayOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetCardAccInfoOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetInfoByTokenOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.GetMyBillOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetPhotoBySnoOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetRsaOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetValidateCodeOUCRequest;
@@ -16,6 +17,7 @@ import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.AccountPayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.GetMyBillOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetPhotoBySnoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetRsaKeyOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetValidateCodeOUCResponse;
@@ -70,6 +72,24 @@ public class OUCRequestSender {
                 .header("Sec-Fetch-Dest", "empty")
                 .header("Referer", "https://vcard.ouc.edu.cn//Phone/Login")
                 .header("User-Agent", "Mozilla/5.0 (Linux; Android 12; ALA-AN70 Build/HONORALA-AN70; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/99.0.4844.88 Mobile Safari/537.36");
+    }
+
+    public void getMyBill(GetMyBillOUCRequest request, OUCCallback<GetMyBillOUCResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    callback.onSuccess(new GetMyBillOUCResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
     public void accountPayAlipay(AccountPayAliPayOUCRequest request, OUCCallback<AccountPayOUCResponse> callback) {

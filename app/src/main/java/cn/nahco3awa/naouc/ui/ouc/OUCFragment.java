@@ -5,7 +5,6 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -32,8 +31,8 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.util.Locale;
 import java.util.Random;
 
-import cn.nahco3awa.naouc.OucBalanceActivity;
-import cn.nahco3awa.naouc.OucLoginMainActivity;
+import cn.nahco3awa.naouc.ui.ouc.activity.OucBalanceActivity;
+import cn.nahco3awa.naouc.ui.ouc.activity.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.databinding.FragmentOucBinding;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
@@ -142,6 +141,12 @@ public class OUCFragment extends Fragment {
             refreshPayCode();
             refreshBalance();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshLogonState();
     }
 
     private void refreshBalance() {
