@@ -1,5 +1,7 @@
 package cn.nahco3awa.naouc.ui.ouc.activity;
 
+import static android.view.View.VISIBLE;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,20 +13,28 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import cn.nahco3awa.naouc.R;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import cn.nahco3awa.naouc.network.ouc.request.AccountPayAliPayOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetCardAccInfoOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.GetMyBillOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.AccountPayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.GetMyBillOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
+import cn.nahco3awa.naouc.ui.ouc.view.ItemMyBillAdapter;
 
 public class OucBalanceActivity extends AppCompatActivity {
     private String account;
     private TextView balanceTextView;
+    private RecyclerView myBillView;
+    private ItemMyBillAdapter adapt = new ItemMyBillAdapter(new ArrayList<>());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +46,32 @@ public class OucBalanceActivity extends AppCompatActivity {
 
         balanceTextView = findViewById(R.id.balanceBigTextView);
 
+        myBillView = findViewById(R.id.myBillListView);
+        myBillView.setVisibility(View.INVISIBLE);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        myBillView.setLayoutManager(layoutManager);
+        myBillView.setAdapter(adapt);
+
         refreshBalance();
+        refreshMyBill();
+    }
+
+    private void refreshMyBill() {
+        OUCRequestSender.getInstance().getMyBill(new GetMyBillOUCRequest(account, 1), new OUCCallback<>() {
+            @Override
+            public void onSuccess(GetMyBillOUCResponse response) {
+                runOnUiThread(() -> {
+                    myBillView.setAdapter(new ItemMyBillAdapter(response.getBillData()));
+                    myBillView.setVisibility(VISIBLE);
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+
+            }
+        });
     }
 
     private void refreshBalance() {

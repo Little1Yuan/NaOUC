@@ -5,9 +5,9 @@ public class SingleBillData {
     public String OCCTIME; // 支出事件
     public String EFFECTDATE; // 生效时间
     public String XQ; // 星期
-    public String MERCHAME; // 消费地点
-    public int TRANAMT; // 金额
-    public String TRANNAM;  // 支付方式
+    public String MERCNAME; // 消费地点
+    public float TRANAMT; // 金额
+    public String TRANNAME;  // 支付方式
     public float CARDBAL; // 余额
     public String JDESC; // 流水简介
     public int JNUM;

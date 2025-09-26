@@ -16,6 +16,8 @@ activity = "1.11.0"
 core = "3.5.3"
 javase = "3.5.3"
 zxingAndroidEmbedded = "4.3.0"
+recyclerview = "1.3.0"
+recyclerviewVersion = "1.4.0"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -34,6 +36,8 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 core = { group = "com.google.zxing", name = "core", version.ref = "core" }
 javase = { group = "com.google.zxing", name = "javase", version.ref = "javase" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerviewVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

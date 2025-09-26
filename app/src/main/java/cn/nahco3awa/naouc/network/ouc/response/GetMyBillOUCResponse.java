@@ -6,13 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import cn.nahco3awa.naouc.network.ouc.response.data.SingleBillData;
 import okhttp3.Response;
 
 public class GetMyBillOUCResponse extends OUCResponse {
-    private final Collection<SingleBillData> billData;
+    private final List<SingleBillData> billData;
     public GetMyBillOUCResponse(Response response) {
         super(response);
         JsonObject jsonObject = JsonParser.parseReader(response.body().charStream()).getAsJsonObject();
@@ -24,7 +24,7 @@ public class GetMyBillOUCResponse extends OUCResponse {
         }
     }
 
-    public Collection<SingleBillData> getBillData() {
+    public List<SingleBillData> getBillData() {
         return billData;
     }
 }
