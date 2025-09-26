@@ -1,5 +1,6 @@
 package cn.nahco3awa.naouc.ui.ouc.activity;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.content.Intent;
@@ -47,7 +48,7 @@ public class OucBalanceActivity extends AppCompatActivity {
         balanceTextView = findViewById(R.id.balanceBigTextView);
 
         myBillView = findViewById(R.id.myBillListView);
-        myBillView.setVisibility(View.INVISIBLE);
+        myBillView.setVisibility(INVISIBLE);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         myBillView.setLayoutManager(layoutManager);
@@ -62,14 +63,15 @@ public class OucBalanceActivity extends AppCompatActivity {
             @Override
             public void onSuccess(GetMyBillOUCResponse response) {
                 runOnUiThread(() -> {
-                    myBillView.setAdapter(new ItemMyBillAdapter(response.getBillData()));
+                    adapt = new ItemMyBillAdapter(response.getBillData());
+                    myBillView.setAdapter(adapt);
                     myBillView.setVisibility(VISIBLE);
                 });
             }
 
             @Override
             public void onFailure(Throwable e) {
-
+                myBillView.setVisibility(INVISIBLE);
             }
         });
     }

@@ -38,6 +38,10 @@ public class ItemMyBillAdapter extends RecyclerView.Adapter<ItemMyBillAdapter.Vi
         holder.setData(data);
     }
 
+    public void addBillData(SingleBillData data) {
+        billData.add(data);
+    }
+
     @Override
     public int getItemCount() {
         return billData.size();

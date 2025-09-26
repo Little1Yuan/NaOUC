@@ -14,6 +14,7 @@ import cn.nahco3awa.naouc.network.ouc.request.GetValidateCodeOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.LoginOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetBarCodePayOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.AccountPayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
@@ -24,6 +25,7 @@ import cn.nahco3awa.naouc.network.ouc.response.GetValidateCodeOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.LoginOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
+import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -35,11 +37,13 @@ public class OUCRequestSender {
     private String sessionId;
     private final String imeiTicket;
     private String sourceTypeTicket;
+    private String jSessionId;
     private final OkHttpClient httpClient;
     private OUCRequestSender(String imeiTicket) {
         this.imeiTicket = imeiTicket;
         this.sourceTypeTicket = "0";
         this.sessionId = "";
+        this.jSessionId = "";
         httpClient = new OkHttpClient();
     }
 
@@ -64,7 +68,7 @@ public class OUCRequestSender {
     }
 
     public Request.Builder setAspHeaders(Request.Builder request) {
-        return request.header("Cookie", "ASP.NET_SessionId=" + getSessionId() + "; imeiticket=" + getImeiTicket() + "; sourcetypeticket=" + getSourceTypeTicket())
+        return request.header("Cookie", "JSESSIONID=" + jSessionId + "; ASP.NET_SessionId=" + getSessionId() + "; imeiticket=" + getImeiTicket() + "; sourcetypeticket=" + getSourceTypeTicket())
                 .header("X-Requested-With", "XMLHttpRequest")
                 .header("Origin", "https://vcard.ouc.edu.cn")
                 .header("Sec-Fetch-Site", "same-origin")
@@ -72,6 +76,24 @@ public class OUCRequestSender {
                 .header("Sec-Fetch-Dest", "empty")
                 .header("Referer", "https://vcard.ouc.edu.cn//Phone/Login")
                 .header("User-Agent", "Mozilla/5.0 (Linux; Android 12; ALA-AN70 Build/HONORALA-AN70; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/99.0.4844.88 Mobile Safari/537.36");
+    }
+
+    public void tsm(TsmOUCRequest request, OUCCallback<TsmOUCResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    callback.onSuccess(new TsmOUCResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
     public void getMyBill(GetMyBillOUCRequest request, OUCCallback<GetMyBillOUCResponse> callback) {
@@ -241,12 +263,19 @@ public class OUCRequestSender {
                             if (kv[0].equals("ASP.NET_SessionId")) {
                                 OUCRequestSender.this.sessionId = kv[1];
                             }
+                            if (kv[0].equals("JSESSIONID")) {
+                                OUCRequestSender.this.jSessionId = kv[1];
+                            }
                         }
                     }
                 }
                 callback.onResponse(call, response);
             }
         });
+    }
+
+    public String getjSessionId() {
+        return jSessionId;
     }
 
     public void setSessionId(String sessionId) {

@@ -28,9 +28,14 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Random;
 
+import cn.nahco3awa.naouc.network.ouc.request.NetCheckOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucBalanceActivity;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
@@ -43,6 +48,10 @@ import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class OUCFragment extends Fragment {
     private SharedPreferences preferences;
@@ -56,6 +65,7 @@ public class OUCFragment extends Fragment {
     private ImageView barcodeImageView;
     private ImageView qrCodeImageView;
     private TextView balanceTextView;
+    private TextView netBalanceTextView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentOucBinding.inflate(inflater, container, false);
@@ -86,6 +96,7 @@ public class OUCFragment extends Fragment {
         barcodeImageView = root.findViewById(R.id.oucBarcodeImageView);
         qrCodeImageView = root.findViewById(R.id.qrCodeImageView);
         balanceTextView = root.findViewById(R.id.balanceTextView);
+        netBalanceTextView = root.findViewById(R.id.netBalanceTextView);
 
         loginButton.setOnClickListener(this::onClickLogin);
         welcomeTextView.setOnClickListener(this::onClickWelcomeText);
@@ -113,6 +124,7 @@ public class OUCFragment extends Fragment {
                         refreshWelcomeText();
                         refreshPayCode();
                         refreshBalance();
+                        refreshNetBalance();
                     });
                 }
 
@@ -147,6 +159,46 @@ public class OUCFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshLogonState();
+    }
+
+    private void refreshNetBalance() {
+        String account = infoResponse.getAccount();
+        netBalanceTextView.setText("...");
+        if (OUCRequestSender.getInstance().getjSessionId().isEmpty()) {
+            OUCRequestSender.getInstance().sendRequest(new NetCheckOUCRequest(), new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    requireActivity().runOnUiThread(() -> {
+                        netBalanceTextView.setText("获取失败");
+                        new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
+                                .setTitle("网费详情获取失败")
+                                .setMessage(e.getMessage())
+                                .show();
+                    });
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    OUCRequestSender.getInstance().tsm(new TsmOUCRequest(account, infoResponse.getSno()), new OUCCallback<>() {
+                        @Override
+                        public void onSuccess(TsmOUCResponse response) {
+                            requireActivity().runOnUiThread(() -> netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0)));
+                        }
+
+                        @Override
+                        public void onFailure(Throwable e) {
+                            requireActivity().runOnUiThread(() -> {
+                                netBalanceTextView.setText("获取失败");
+                                new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
+                                        .setTitle("网费详情获取失败")
+                                        .setMessage(e.getMessage())
+                                        .show();
+                            });
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private void refreshBalance() {
