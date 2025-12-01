@@ -162,7 +162,6 @@ public class OUCFragment extends Fragment {
     }
 
     private void refreshNetBalance() {
-        String account = infoResponse.getAccount();
         netBalanceTextView.setText("...");
         if (OUCRequestSender.getInstance().getjSessionId().isEmpty()) {
             OUCRequestSender.getInstance().sendRequest(new NetCheckOUCRequest(), new Callback() {
@@ -179,26 +178,33 @@ public class OUCFragment extends Fragment {
 
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) {
-                    OUCRequestSender.getInstance().tsm(new TsmOUCRequest(account, infoResponse.getSno()), new OUCCallback<>() {
-                        @Override
-                        public void onSuccess(TsmOUCResponse response) {
-                            requireActivity().runOnUiThread(() -> netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0)));
-                        }
-
-                        @Override
-                        public void onFailure(Throwable e) {
-                            requireActivity().runOnUiThread(() -> {
-                                netBalanceTextView.setText("获取失败");
-                                new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
-                                        .setTitle("网费详情获取失败")
-                                        .setMessage(e.getMessage())
-                                        .show();
-                            });
-                        }
-                    });
+                    refreshNetByTsm();
                 }
             });
+        } else {
+            refreshNetByTsm();
         }
+    }
+
+    private void refreshNetByTsm() {
+        String account = infoResponse.getAccount();
+        OUCRequestSender.getInstance().tsm(new TsmOUCRequest(account, infoResponse.getSno()), new OUCCallback<>() {
+            @Override
+            public void onSuccess(TsmOUCResponse response) {
+                requireActivity().runOnUiThread(() -> netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0)));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                requireActivity().runOnUiThread(() -> {
+                    netBalanceTextView.setText("获取失败");
+                    new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
+                            .setTitle("网费详情获取失败")
+                            .setMessage(e.getMessage())
+                            .show();
+                });
+            }
+        });
     }
 
     private void refreshBalance() {
