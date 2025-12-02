@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +34,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import cn.nahco3awa.naouc.network.ouc.request.NetCheckOUCRequest;
-import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucBalanceActivity;
@@ -48,9 +48,9 @@ import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
+import cn.nahco3awa.naouc.ui.ouc.activity.OucNetActivity;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Request;
 import okhttp3.Response;
 
 public class OUCFragment extends Fragment {
@@ -60,16 +60,16 @@ public class OUCFragment extends Fragment {
     private String sourceType = null;
     private Button loginButton;
     private TextView welcomeTextView;
-    private View root;
     private ActivityResultLauncher<Intent> loginLauncher;
     private ImageView barcodeImageView;
     private ImageView qrCodeImageView;
     private TextView balanceTextView;
     private TextView netBalanceTextView;
+    private ImageView netBalanceImageView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentOucBinding.inflate(inflater, container, false);
-        root = binding.getRoot();
+        View root = binding.getRoot();
         Context context = root.getContext();
 
         preferences = context.getSharedPreferences("ouc", MODE_PRIVATE);
@@ -97,12 +97,14 @@ public class OUCFragment extends Fragment {
         qrCodeImageView = root.findViewById(R.id.qrCodeImageView);
         balanceTextView = root.findViewById(R.id.balanceTextView);
         netBalanceTextView = root.findViewById(R.id.netBalanceTextView);
+        netBalanceImageView = root.findViewById(R.id.netImage);
 
         loginButton.setOnClickListener(this::onClickLogin);
         welcomeTextView.setOnClickListener(this::onClickWelcomeText);
         barcodeImageView.setOnClickListener(this::onClickRefreshPayCode);
         qrCodeImageView.setOnClickListener(this::onClickRefreshPayCode);
         root.findViewById(R.id.cashButton).setOnClickListener(this::onClickBalance);
+        root.findViewById(R.id.netButton).setOnClickListener(this::onClickNet);
 
         refreshLogonState();
 
@@ -191,7 +193,16 @@ public class OUCFragment extends Fragment {
         OUCRequestSender.getInstance().tsm(new TsmOUCRequest(account, infoResponse.getSno()), new OUCCallback<>() {
             @Override
             public void onSuccess(TsmOUCResponse response) {
-                requireActivity().runOnUiThread(() -> netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0)));
+                requireActivity().runOnUiThread(() -> {
+                    int redColor = 0xFFF44336;
+                    if (response.isFrozen()) {
+                        netBalanceTextView.setText("停机");
+                        netBalanceImageView.setColorFilter(redColor, PorterDuff.Mode.MULTIPLY);
+                    } else {
+                        netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0));
+                        netBalanceImageView.setColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
+                    }
+                });
             }
 
             @Override
@@ -282,6 +293,14 @@ public class OUCFragment extends Fragment {
     private void onClickBalance(View view) {
         if (isLogon() && infoResponse != null) {
             Intent intent = new Intent(getActivity(), OucBalanceActivity.class);
+            intent.putExtra("account", infoResponse.getAccount());
+            startActivity(intent);
+        }
+    }
+
+    private void onClickNet(View view) {
+        if (isLogon() && infoResponse != null) {
+            Intent intent = new Intent(getActivity(), OucNetActivity.class);
             intent.putExtra("account", infoResponse.getAccount());
             startActivity(intent);
         }

@@ -11,6 +11,9 @@ public class TsmOUCResponse extends OUCResponse {
     private final String account;
     private final String netAccount;
     private final float balance;
+    private final boolean isFrozen;
+    private final boolean hasLost;
+    private final String retcode;
 
     public TsmOUCResponse(Response response) {
         super(response);
@@ -18,12 +21,15 @@ public class TsmOUCResponse extends OUCResponse {
         if (!jsonObject.get("retcode").getAsString().equals("0")) {
             throw new RuntimeException(jsonObject.get("errmsg").getAsString());
         }
+        retcode =
         msg = jsonObject.get("errmsg").getAsString();
         aid = jsonObject.get("aid").getAsString();
         account = jsonObject.get("account").getAsString();
         JsonObject netAccountObject = jsonObject.getAsJsonObject("netacc");
         netAccount = netAccountObject.get("netacc").getAsString();
         balance = Integer.parseInt(netAccountObject.get("bal").getAsString()) / 100.0f;
+        isFrozen = netAccountObject.get("freezeflag").getAsString().equals("1");
+        hasLost = netAccountObject.get("lostflag").getAsString().equals("1");
     }
 
     public String getMsg() {
@@ -44,5 +50,13 @@ public class TsmOUCResponse extends OUCResponse {
 
     public float getBalance() {
         return balance;
+    }
+
+    public boolean isFrozen() {
+        return isFrozen;
+    }
+
+    public boolean hasLost() {
+        return hasLost;
     }
 }

@@ -15,13 +15,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NaOUC">
         <activity
+            android:name=".ui.ouc.activity.OucNetActivity"
+            android:label="校园网账号管理"
+            android:exported="false" />
+        <activity
             android:name=".ui.ouc.activity.OucBalanceActivity"
+            android:label="我的余额"
             android:exported="false" />
         <activity
             android:name=".ui.ouc.activity.OucLoginMainActivity"
-            android:label="我的余额" />
+            android:label="登录到 OUC" />
         <activity
             android:name=".MainActivity"
+            android:label="NaOUC"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
