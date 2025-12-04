@@ -93,7 +93,7 @@ public class OucBalanceActivity extends AppCompatActivity {
     public void onClickPay(View view) {
         EditText editText = new EditText(this);
         editText.setHint("请输入金额...");
-        editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         new AlertDialog.Builder(this)
                 .setTitle("充值")
                 .setView(editText)

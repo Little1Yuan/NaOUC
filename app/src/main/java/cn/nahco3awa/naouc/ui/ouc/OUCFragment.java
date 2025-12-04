@@ -199,8 +199,8 @@ public class OUCFragment extends Fragment {
                         netBalanceTextView.setText("停机");
                         netBalanceImageView.setColorFilter(redColor, PorterDuff.Mode.MULTIPLY);
                     } else {
-                        netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance() / 100.0));
-                        netBalanceImageView.setColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
+                        netBalanceTextView.setText(String.format(Locale.SIMPLIFIED_CHINESE, "%.2f", response.getBalance()));
+                        netBalanceImageView.setColorFilter(null);
                     }
                 });
             }
@@ -302,6 +302,7 @@ public class OUCFragment extends Fragment {
         if (isLogon() && infoResponse != null) {
             Intent intent = new Intent(getActivity(), OucNetActivity.class);
             intent.putExtra("account", infoResponse.getAccount());
+            intent.putExtra("sno", infoResponse.getSno());
             startActivity(intent);
         }
     }

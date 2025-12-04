@@ -13,6 +13,7 @@ import cn.nahco3awa.naouc.network.ouc.request.GetRsaOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetValidateCodeOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.LoginOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.GetBarCodePayOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.NetGdcOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.response.AccountPayOUCResponse;
@@ -24,6 +25,7 @@ import cn.nahco3awa.naouc.network.ouc.response.GetRsaKeyOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetValidateCodeOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.LoginOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetBarCodePayOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.NetGdcOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
 import okhttp3.Call;
@@ -76,6 +78,24 @@ public class OUCRequestSender {
                 .header("Sec-Fetch-Dest", "empty")
                 .header("Referer", "https://vcard.ouc.edu.cn//Phone/Login")
                 .header("User-Agent", "Mozilla/5.0 (Linux; Android 12; ALA-AN70 Build/HONORALA-AN70; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/99.0.4844.88 Mobile Safari/537.36");
+    }
+
+    public void netGdc(NetGdcOUCRequest request, OUCCallback<NetGdcOUCResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    callback.onSuccess(new NetGdcOUCResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
     public void tsm(TsmOUCRequest request, OUCCallback<TsmOUCResponse> callback) {

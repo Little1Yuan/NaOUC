@@ -21,7 +21,7 @@ public class TsmOUCResponse extends OUCResponse {
         if (!jsonObject.get("retcode").getAsString().equals("0")) {
             throw new RuntimeException(jsonObject.get("errmsg").getAsString());
         }
-        retcode =
+        retcode = jsonObject.get("retcode").getAsString();
         msg = jsonObject.get("errmsg").getAsString();
         aid = jsonObject.get("aid").getAsString();
         account = jsonObject.get("account").getAsString();

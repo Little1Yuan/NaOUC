@@ -1,6 +1,5 @@
 package cn.nahco3awa.naouc.network.ouc.request;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
