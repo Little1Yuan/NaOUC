@@ -2,22 +2,11 @@ package cn.nahco3awa.naouc;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-import android.Manifest;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -25,8 +14,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import cn.nahco3awa.naouc.databinding.ActivityMainBinding;
-import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
-import cn.nahco3awa.naouc.ui.ouc.OUCFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override
