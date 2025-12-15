@@ -35,7 +35,9 @@ import java.util.Random;
 
 import cn.nahco3awa.naouc.network.ouc.request.NetCheckOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
+import cn.nahco3awa.naouc.network.ouc.request.WaterApiAccUseHzWatchRequest;
 import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
+import cn.nahco3awa.naouc.network.ouc.response.WaterApiAccUseHzWatchResponse;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucBalanceActivity;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucLoginMainActivity;
 import cn.nahco3awa.naouc.R;
@@ -49,6 +51,7 @@ import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 import cn.nahco3awa.naouc.ui.ouc.activity.OucNetActivity;
+import cn.nahco3awa.naouc.ui.ouc.activity.OucWaterActivity;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -65,6 +68,7 @@ public class OUCFragment extends Fragment {
     private ImageView qrCodeImageView;
     private TextView balanceTextView;
     private TextView netBalanceTextView;
+    private TextView waterAvailableTextView;
     private ImageView netBalanceImageView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -98,6 +102,7 @@ public class OUCFragment extends Fragment {
         balanceTextView = root.findViewById(R.id.balanceTextView);
         netBalanceTextView = root.findViewById(R.id.netBalanceTextView);
         netBalanceImageView = root.findViewById(R.id.netImage);
+        waterAvailableTextView = root.findViewById(R.id.waterBalanceTextView);
 
         loginButton.setOnClickListener(this::onClickLogin);
         welcomeTextView.setOnClickListener(this::onClickWelcomeText);
@@ -105,6 +110,7 @@ public class OUCFragment extends Fragment {
         qrCodeImageView.setOnClickListener(this::onClickRefreshPayCode);
         root.findViewById(R.id.cashButton).setOnClickListener(this::onClickBalance);
         root.findViewById(R.id.netButton).setOnClickListener(this::onClickNet);
+        root.findViewById(R.id.waterButton).setOnClickListener(this::onClickWater);
 
         refreshLogonState();
 
@@ -127,6 +133,7 @@ public class OUCFragment extends Fragment {
                         refreshPayCode();
                         refreshBalance();
                         refreshNetBalance();
+                        refreshAvailableWater();
                     });
                 }
 
@@ -154,6 +161,8 @@ public class OUCFragment extends Fragment {
         if (isLogon() && infoResponse != null) {
             refreshPayCode();
             refreshBalance();
+            refreshNetBalance();
+            refreshAvailableWater();
         }
     }
 
@@ -163,19 +172,28 @@ public class OUCFragment extends Fragment {
         refreshLogonState();
     }
 
+    private void refreshAvailableWater() {
+        waterAvailableTextView.setText("...");
+        OUCRequestSender.getInstance().waterApiAccUseHzWatch(new WaterApiAccUseHzWatchRequest(infoResponse.getAccount()), new OUCCallback<>() {
+            @Override
+            public void onSuccess(WaterApiAccUseHzWatchResponse response) {
+                requireActivity().runOnUiThread(() -> waterAvailableTextView.setText(response.getData().size() + " 可用"));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                requireActivity().runOnUiThread(() -> waterAvailableTextView.setText("获取失败"));
+            }
+        });
+    }
+
     private void refreshNetBalance() {
         netBalanceTextView.setText("...");
         if (OUCRequestSender.getInstance().getjSessionId().isEmpty()) {
             OUCRequestSender.getInstance().sendRequest(new NetCheckOUCRequest(), new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    requireActivity().runOnUiThread(() -> {
-                        netBalanceTextView.setText("获取失败");
-                        new androidx.appcompat.app.AlertDialog.Builder(requireActivity())
-                                .setTitle("网费详情获取失败")
-                                .setMessage(e.getMessage())
-                                .show();
-                    });
+                    requireActivity().runOnUiThread(() -> netBalanceTextView.setText("获取失败"));
                 }
 
                 @Override
@@ -287,6 +305,14 @@ public class OUCFragment extends Fragment {
                     .setMessage(e.getMessage())
                     .setNegativeButton("蒿", null)
                     .show());
+        }
+    }
+
+    private void onClickWater(View view) {
+        if (isLogon() && infoResponse != null) {
+            Intent intent = new Intent(getActivity(), OucWaterActivity.class);
+            intent.putExtra("account", infoResponse.getAccount());
+            startActivity(intent);
         }
     }
 
