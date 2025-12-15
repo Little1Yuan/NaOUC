@@ -59,6 +59,7 @@ public class OucBalanceActivity extends AppCompatActivity {
     }
 
     private void refreshMyBill() {
+        myBillView.setVisibility(INVISIBLE);
         OUCRequestSender.getInstance().getMyBill(new GetMyBillOUCRequest(account, 1), new OUCCallback<>() {
             @Override
             public void onSuccess(GetMyBillOUCResponse response) {

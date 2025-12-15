@@ -59,7 +59,6 @@ import okhttp3.Response;
 public class OUCFragment extends Fragment {
     private SharedPreferences preferences;
     private FragmentOucBinding binding;
-    private String sno = null;
     private String sourceType = null;
     private Button loginButton;
     private TextView welcomeTextView;
@@ -118,10 +117,10 @@ public class OUCFragment extends Fragment {
     }
 
     private GetInfoByTokenOUCResponse infoResponse = null;
+
     public void refreshLogonState() {
         if (isLogon()) {
             loginButton.setText("登出");
-            sno = preferences.getString("sno",  "");
             sourceType = preferences.getString("source_ticket", "");
             OUCRequestSender.getInstance().setSourceTypeTicket(sourceType);
             OUCRequestSender.getInstance().getInfoByToken(new GetInfoByTokenOUCRequest(OUCRequestSender.getInstance().getImeiTicket(), sourceType, sourceType), new OUCCallback<>() {

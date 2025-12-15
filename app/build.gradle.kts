@@ -1,6 +1,3 @@
-import com.android.build.api.dsl.Packaging
-import org.gradle.internal.declarativedsl.parsing.main
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -14,7 +11,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.1.2"
+        versionName = "0.1.3"
 
         ndk {
             abiFilters.add("arm64-v8a")

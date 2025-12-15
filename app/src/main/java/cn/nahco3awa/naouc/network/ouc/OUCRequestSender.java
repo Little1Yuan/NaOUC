@@ -17,6 +17,8 @@ import cn.nahco3awa.naouc.network.ouc.request.NetGdcOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.OUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.TsmOUCRequest;
 import cn.nahco3awa.naouc.network.ouc.request.WaterApiAccUseHzWatchRequest;
+import cn.nahco3awa.naouc.network.ouc.request.WaterApiBookCodeCancelRequest;
+import cn.nahco3awa.naouc.network.ouc.request.WaterApiBookCodeRequest;
 import cn.nahco3awa.naouc.network.ouc.response.AccountPayOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetCardAccInfoOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.GetInfoByTokenOUCResponse;
@@ -30,6 +32,8 @@ import cn.nahco3awa.naouc.network.ouc.response.NetGdcOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.OUCCallback;
 import cn.nahco3awa.naouc.network.ouc.response.TsmOUCResponse;
 import cn.nahco3awa.naouc.network.ouc.response.WaterApiAccUseHzWatchResponse;
+import cn.nahco3awa.naouc.network.ouc.response.WaterApiBookCodeCancelResponse;
+import cn.nahco3awa.naouc.network.ouc.response.WaterApiBookCodeResponse;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -80,6 +84,42 @@ public class OUCRequestSender {
                 .header("Sec-Fetch-Dest", "empty")
                 .header("Referer", "https://vcard.ouc.edu.cn//Phone/Login")
                 .header("User-Agent", "Mozilla/5.0 (Linux; Android 12; ALA-AN70 Build/HONORALA-AN70; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/99.0.4844.88 Mobile Safari/537.36");
+    }
+
+    public void waterApiBookCodeCancel(WaterApiBookCodeCancelRequest request, OUCCallback<WaterApiBookCodeCancelResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    callback.onSuccess(new WaterApiBookCodeCancelResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
+    }
+
+    public void waterApiBookCode(WaterApiBookCodeRequest request, OUCCallback<WaterApiBookCodeResponse> callback) {
+        sendRequest(request, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    callback.onSuccess(new WaterApiBookCodeResponse(response));
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
     public void waterApiAccUseHzWatch(WaterApiAccUseHzWatchRequest request, OUCCallback<WaterApiAccUseHzWatchResponse> callback) {

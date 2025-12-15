@@ -11,20 +11,24 @@ import javax.crypto.spec.SecretKeySpec;
 import cn.nahco3awa.naouc.network.ouc.OUCRequestSender;
 import okhttp3.Request;
 
-public class WaterApiAccUseHzWatchRequest implements OUCRequest {
-    public static final String URL = "http://222.195.158.17:5003/waterapi/api/AccUseHzWatch";
+public class WaterApiBookCodeCancelRequest implements OUCRequest {
+    public static final String URL = "http://222.195.158.17:5003/waterapi/api/BookCodeReqCancel";
     public static final byte[] PUBLIC_KEY = Base64.getDecoder().decode("3n4DdO47LWH2Co/WfpbdyA==");
     public static final String AES_MODE = "AES/ECB/PKCS5Padding";
     public static final String AES = "AES";
     private final String account;
-    public WaterApiAccUseHzWatchRequest(String account) {
+    private final int classNo;
+
+    public WaterApiBookCodeCancelRequest(String account, int classNo) {
         this.account = account;
+        this.classNo = classNo;
     }
 
     @Override
     public Request makeRequest(OUCRequestSender sender) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("ano", account);
+        jsonObject.addProperty("classno", classNo);
         try {
             byte[] raw = jsonObject.toString().getBytes(StandardCharsets.UTF_8);
             SecretKeySpec keySpec = new SecretKeySpec(PUBLIC_KEY, AES);

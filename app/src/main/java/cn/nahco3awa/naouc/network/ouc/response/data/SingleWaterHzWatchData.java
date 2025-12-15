@@ -9,8 +9,8 @@ public final class SingleWaterHzWatchData {
     private final int WarnPosNum;
     private final int UseFreeRate;
     private final int BookRate;
-    private final int Actkind;
-    private final String BookCode;
+    private int Actkind;
+    private String BookCode;
 
     public SingleWaterHzWatchData(
             int ClassNo, // 单位编号
@@ -97,5 +97,11 @@ public final class SingleWaterHzWatchData {
                 "BookCode=" + BookCode + ']';
     }
 
+    public void setActkind(int actkind) {
+        Actkind = actkind;
+    }
 
+    public void setBookCode(String bookCode) {
+        BookCode = bookCode;
+    }
 }

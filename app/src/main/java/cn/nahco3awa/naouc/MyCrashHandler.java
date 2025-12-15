@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,6 +37,10 @@ public class MyCrashHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(@NonNull Thread t, Throwable e) {
+        new AlertDialog.Builder(mcontext)
+                .setTitle("未捕获的异常！")
+                .setMessage(e.getMessage())
+                .show();
         Toast.makeText(mcontext, e.getMessage(), LENGTH_LONG).show();
         if (!handleExample(e) && mDefaultHandler != null) {
             mDefaultHandler.uncaughtException(t, e);
